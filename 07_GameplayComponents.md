@@ -61,15 +61,13 @@ Create a timer script to time your maze
 
 By default, Unity will generate a code template when you create new scripts from within the editor. The boilerplate code gives you everything you need for the basic functionality of your script, including two methods that will manage the initialization of the script and update it on each tick of the gameplay.
 
-````
+````csharp
 using UnityEngine;
 using System.Collections;
 
 public class TimerController : MonoBehaviour {
-
   // Use this for initialization
   void Start () {
-
 
   }
 
@@ -82,13 +80,13 @@ public class TimerController : MonoBehaviour {
 ````
 The two methods are pretty straightforward: `Start()` is called when the scene is first rendered, and `Update()` is called on subsequent frames of the gameplay. To create the timer text, the first thing we'll want to do is add the following directive:
 
-````
+````csharp
 using UnityEngine.UI;
 ````
 
 This will allow us to interact with our GUI objects on the screen so that we can update our text box text. Next, we'll declare our variables for two objects - the text box we're editing, and a float to store the timer. Above the `Start()` function, add the following lines:
 
-````
+````chsarp
 static float timer = 0.0f;
 public Text text_box;
 ````
@@ -96,16 +94,17 @@ Unity uses their editor to interact with the scripts we write, so we'll actually
 
 Once we have those lines set, the next thing we'll do is include an incremental addition to the `Update()` method and update our UI to show the running time:
 
-````
+````csharp
 // Update is called once per frame
-   void Update () {
+  void Update () {
     timer += Time.deltaTime;
-    text_box.text = timer.ToString("0.00");}
+    text_box.text = timer.ToString("0.00");
+  }
 ````
 
 With that, we're almost done with our first script - all that's left is assigning our UI Text box to be the one we update with the timer.The final code should look like this:
 
-````
+````csharp
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
@@ -114,10 +113,8 @@ static float timer = 0.0f;
 public Text text_box;
 
 public class TimerController : MonoBehaviour {
-
   // Use this for initialization
   void Start () {
-
 
   }
 
@@ -220,7 +217,7 @@ Add in global variables
 
 To implement these, add the following lines of code to your TimerController script under the timer and text_box objects:
 
-```
+```csharp
 public bool isRunning = true;
 Vector3 startPosition;
 public CharacterController characterController;
@@ -231,7 +228,7 @@ Store the starting position
 
 In order to reset the position of our camera once the player has finished navigating through the maze, we need to store our initial coordinates for the character controller in the `startPosition` object. The 'Vector3' object [stores these coordinates](http://docs.unity3d.com/ScriptReference/Vector3.html) when the game is launched, so we'll be including this in our `Start()` method.
 
-```
+```csharp
 // Use this for initialization
 void Start () {
   startPosition = characterController.gameObject.transform.position;
@@ -247,25 +244,25 @@ Create the `OnTriggerEnter()` and `Reset()` functions
 
 The `OnTriggerEnter()` function is what Unity will call when your object recognizes that there is an overlap between it and another GameObject - in this case, we are writing the function for our capsule, and whatever object collides with it (in this case, our character) will be passed in as an argument.
 
-```
-void OnTriggerEnter(Collider other)
-	{
-		isRunning = false;
-		Reset ();
-	}
+```csharp
+  void OnTriggerEnter(Collider other)
+  {
+    isRunning = false;
+    Reset ();
+  }
 ```
 
 At this point, we should get an error if we switch back into Unity since we haven't added our reset function. In this case, we've pulled it out as a separate function so we can modify the reset behavior without getting strange behaviors in `OnTriggerEnter()` but for the basic behavior, you could add in the `Reset()` code to the collision trigger if you so chose.
 
 Add in the `Reset()` function by copy and pasting the following function. `Reset()` will move our character controller back to the start of the maze, begin the timer at zero again, and restart the timer.
 
-```
-void Reset()
-	{
-		characterController.gameObject.transform.position = startPosition;
-		timer = 0.0f;
-		isRunning = true;
-	}
+```csharp
+  void Reset()
+  {
+    characterController.gameObject.transform.position = startPosition;
+    timer = 0.0f;
+    isRunning = true;
+  }
 ```
 
 {x: updatetimer}
@@ -273,58 +270,59 @@ Change the `Update()` function to check if the timer should be running
 
 With those two functions in place, we need to make one minor change to our `Update()` call so that the timer checks to make sure it's running before incrementing the number of seconds on the clock. This is an important step because we will later want to implement a keypress to start the timer, and we need it to stay paused until it's reset when the maze is completed. To do this, we'll just be putting an if-statement around the current `Update()` code to check the boolean we declared above:
 
-```
+```csharp
 // Update is called once per frame
-	void Update () {
-
-		if (isRunning) {
-						timer += Time.deltaTime;
-						text_box.text = timer.ToString ("0.00");
-				}
-	}
+  void Update ()
+  {
+    if (isRunning)
+    {
+      timer += Time.deltaTime;
+      text_box.text = timer.ToString ("0.00");
+    }
+  }
 ```
 After that change, we're just about ready to go - but we've got a few more tweaks to do in Unity itself so that the script runs. The full code should look like this:
 
-```
+```csharp
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
 public class TimerController : MonoBehaviour {
+  static float timer = 0.0f;
+  public Text text_box;
+  public bool isRunning = true;
+  Vector3 startPosition;
+  public CharacterController characterController;
 
-	static float timer = 0.0f;
-	public Text text_box;
-	public bool isRunning = true;
-	Vector3 startPosition;
-	public CharacterController characterController;
+// Use this for initialization
+  void Start ()
+  {
+    startPosition = characterController.gameObject.transform.position;
+  }
 
-	// Use this for initialization
-	void Start () {
+// Update is called once per frame
+  void Update ()
+  {
+    if (isRunning)
+    {
+      timer += Time.deltaTime;
+      text_box.text = timer.ToString ("0.00");
+    }
+  }
 
-		startPosition = characterController.gameObject.transform.position;
-	}
+  void OnTriggerEnter(Collider other)
+  {
+    isRunning = false;
+    Reset ();
+  }
 
-	// Update is called once per frame
-	void Update () {
-
-		if (isRunning) {
-						timer += Time.deltaTime;
-						text_box.text = timer.ToString ("0.00");
-				}
-	}
-
-	void OnTriggerEnter(Collider other)
-	{
-		isRunning = false;
-		Reset ();
-	}
-
-	void Reset()
-	{
-		characterController.gameObject.transform.position = startPosition;
-		timer = 0.0f;
-		isRunning = true;
-	}
+  void Reset()
+  {
+    characterController.gameObject.transform.position = startPosition;
+    timer = 0.0f;
+    isRunning = true;
+  }
 }
 ```
 
@@ -348,13 +346,13 @@ The last thing that we're going to do is add a function in our TimerController t
 
 First, we want to change our timer declaration. Over in our `TimerController.cs` script, change
 
-```
+```csharp
 public bool isRunning = true;
 ```
 
 to
 
-```
+```csharp
 public bool isRunning = false;
 ```
 
@@ -367,80 +365,81 @@ Finalize script functions
 
 In the `Reset()` function, we want to change the behavior from immediately resetting the game and starting the timer to having the timer reset and allowing for another player to try. We're also going to remove the `isRunning = false` line from our `OnTriggerEnter()` function and move that into `Reset()` after we put the player back into the original position. Now, `OnTriggerEnter` will just call `Reset()`, and the two functions should look like:
 
-```
-  void OnTriggerEnter(Collider other)
-	{
-		Reset ();
-	}
+```csharp
+  void OnTriggerEnter (Collider other)
+  {
+    Reset ();
+  }
 
-	/* Call Reset once we start the game over. */
-	void Reset()
-	{
-		characterController.gameObject.transform.position = startPosition;
-		isRunning = false;
-		timer = 0.0f;
-		text_box.text = "Press 'F' to begin";
-	}
-
+// Call Reset once we start the game over.
+  void Reset ()
+  {
+    characterController.gameObject.transform.position = startPosition;
+    isRunning = false;
+    timer = 0.0f;
+    text_box.text = "Press 'F' to begin";
+  }
 ```
 
 With these two functions in place, all that's left is to add in a check to see if the player has pressed the 'F' key to start the timer. We will add the following block of code under the existing lines in the `Update()` method. This will check first that the timer isn't running (we don't want to reset if the game is in progress) and if there was a registered key down input on the 'F' keyboard key. If these are both true, then we will begin the timer to start the game.
 
-```
-if (!isRunning & Input.GetKeyDown (KeyCode.F)) {
-          isRunning = true;
-      }
+```csharp
+  if (!isRunning & Input.GetKeyDown (KeyCode.F))
+  {
+    isRunning = true;
+  }
 ```
 
 The final script we have will look like this:
 
-```
+```csharp
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
 public class TimerController : MonoBehaviour {
+  static float timer = 0.0f;
+  public Text text_box;
+  public bool isRunning = false;
+  Vector3 startPosition;
+  public CharacterController characterController;
 
-	static float timer = 0.0f;
-	public Text text_box;
-	public bool isRunning = false;
-	Vector3 startPosition;
-	public CharacterController characterController;
+// Use this for initialization
+  void Start ()
+  {
+    startPosition = characterController.gameObject.transform.position;
+  }
 
-	// Use this for initialization
-	void Start () {
+// Update is called once per frame
+  void Update ()
+  {
+    if (isRunning)
+    {
+      timer += Time.deltaTime;
+      text_box.text = timer.ToString ("0.00");
+    }
 
-		startPosition = characterController.gameObject.transform.position;
-	}
+    if (!isRunning & Input.GetKeyDown (KeyCode.F))
+    {
+      isRunning = true;
+    }
+  }
 
-	// Update is called once per frame
-	void Update () {
+/* We want to check when the character collides with a trigger object,
+   in this case, the particle system cylinder that ends the run. */
+  void OnTriggerEnter(Collider other)
+  {
+    Reset ();
+  }
 
-				if (isRunning) {
-						timer += Time.deltaTime;
-						text_box.text = timer.ToString ("0.00");
-				}
-
-				if (!isRunning & Input.GetKeyDown (KeyCode.F)) {
-						isRunning = true;
-				}
-
-	}
-	/* We want to check when the character collides with a trigger object,
-	   in this case, the particle system cylinder that ends the run. */
-	void OnTriggerEnter(Collider other)
-	{
-		Reset ();
-	}
-
-	/* Call Reset once we start the game over. */
-	void Reset()
-	{
-		characterController.gameObject.transform.position = startPosition;
-		isRunning = false;
-		timer = 0.0f;
-		text_box.text = "Press 'F' to begin";
-	}
+/* Call Reset once we start the game over. */
+  void Reset()
+  {
+    characterController.gameObject.transform.position = startPosition;
+    isRunning = false;
+    timer = 0.0f;
+    text_box.text = "Press 'F' to begin";
+  }
 }
-
 ```
+
